@@ -1,119 +1,411 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>就活オファー比較</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>就活オファー比較（固定残業対応）</title>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-      background: #f5f6f8;
-      padding: 20px;
+    :root{
+      --bg:#f6f7fb; --card:#fff; --text:#111827; --muted:#6b7280;
+      --border:#e5e7eb; --ok:#16a34a; --ng:#dc2626; --warn:#f59e0b; --btn:#2563eb;
     }
-    h1 {
-      text-align: center;
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:900px;margin:0 auto;padding:18px 14px 40px}
+    h1{font-size:20px;margin:8px 0 6px}
+    .sub{font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:820px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+    .card h2{font-size:15px;margin:0 0 10px}
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    input, select{
+      width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);
+      font-size:16px;background:#fff;outline:none
     }
-    .card {
-      max-width: 420px;
-      margin: 20px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    input:focus, select:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .chips{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{
+      display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);
+      padding:10px 12px;border-radius:999px
     }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: bold;
+    .btns{display:flex;gap:10px;margin-top:14px}
+    button{
+      flex:1;border:0;border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700;cursor:pointer
     }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 4px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      margin-top: 16px;
-      width: 100%;
-      padding: 12px;
-      background: #377dff;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-    .result {
-      margin-top: 16px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #eef2ff;
-    }
-    .ng {
-      background: #ffe5e5;
-      color: #b00020;
-    }
+    .primary{background:var(--btn);color:#fff}
+    .ghost{background:#fff;border:1px solid var(--border);color:#111827}
+    .result{margin-top:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px}
+    .badge{display:inline-flex;align-items:center;gap:6px;font-weight:900;font-size:13px;padding:6px 10px;border-radius:999px;margin-bottom:10px}
+    .b-ok{background:rgba(22,163,74,.12);color:var(--ok);border:1px solid rgba(22,163,74,.25)}
+    .b-ng{background:rgba(220,38,38,.10);color:var(--ng);border:1px solid rgba(220,38,38,.22)}
+    .b-warn{background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.25)}
+    .kv{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .item{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px}
+    .k{color:var(--muted);font-size:12px;margin-bottom:4px}
+    .v{font-size:16px;font-weight:900}
+    .small{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.5}
+    .hr{height:1px;background:var(--border);margin:12px 0}
+    .hidden{display:none}
+    .warnlist{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:12px;line-height:1.6}
   </style>
 </head>
+
 <body>
+  <div class="wrap">
+    <h1>就活オファー比較（固定残業対応）</h1>
+    <p class="sub">
+      「月給が高い＝勝ち」じゃないやつを数値化。<br>
+      年収（ボーナス込み） ÷ 年間労働時間（休日＋残業込み）で <b>実質時給</b> を出します。<br>
+      固定残業代がある会社は、<b>固定残業（時間）を残業として換算</b>します。
+    </p>
 
-<h1>就活オファー比較</h1>
+    <div class="grid">
+      <div class="card">
+        <h2>入力</h2>
 
-<div class="card">
-  <label>年間休日（日）</label>
-  <input id="holiday" type="number" placeholder="例：120">
+        <div class="chips" role="radiogroup" aria-label="固定残業代の有無">
+          <label class="chip">
+            <input type="radio" name="fixedMode" value="yes" checked>
+            固定残業代あり
+          </label>
+          <label class="chip">
+            <input type="radio" name="fixedMode" value="no">
+            固定残業代なし
+          </label>
+        </div>
 
-  <label>残業時間（月・時間）</label>
-  <input id="overtime" type="number" placeholder="例：20">
+        <div class="row">
+          <div>
+            <label>月給（万円）</label>
+            <input id="salaryMan" inputmode="decimal" placeholder="例：23">
+          </div>
+          <div>
+            <label>ボーナス（ヶ月）</label>
+            <input id="bonusMonths" inputmode="decimal" placeholder="例：2（無ければ0）">
+          </div>
+        </div>
 
-  <label>月給（万円）</label>
-  <input id="salary" type="number" placeholder="例：23">
+        <div class="row">
+          <div>
+            <label>年間休日（日）</label>
+            <input id="holidays" inputmode="numeric" placeholder="例：120">
+          </div>
+          <div>
+            <label>1日の労働時間（h）</label>
+            <select id="hoursDay">
+              <option value="7">7</option>
+              <option value="7.5">7.5</option>
+              <option value="8" selected>8</option>
+              <option value="8.5">8.5</option>
+              <option value="9">9</option>
+            </select>
+          </div>
+        </div>
 
-  <label>ボーナス（◯ヶ月分）</label>
-  <input id="bonus" type="number" placeholder="例：2">
+        <!-- 固定残業あり -->
+        <div id="fixedBox">
+          <div class="row">
+            <div>
+              <label>固定残業代（円／月）</label>
+              <input id="fixedPay" inputmode="numeric" placeholder="例：50000">
+            </div>
+            <div>
+              <label>固定残業時間（h／月）</label>
+              <input id="fixedHours" inputmode="decimal" placeholder="例：40">
+            </div>
+          </div>
+          <div class="small">
+            ※ この「固定残業時間（h/月）」を、残業として年間に換算します（×12）。
+          </div>
+        </div>
 
-  <button onclick="calc()">条件チェック</button>
+        <!-- 固定残業なし -->
+        <div id="noFixedBox" class="hidden">
+          <label>想定残業時間（h／月）</label>
+          <input id="otMonth" inputmode="decimal" placeholder="例：20">
+          <div class="small">
+            ※ 固定残業が無い会社は、想定（または平均）残業時間を入れてね。
+          </div>
+        </div>
 
-  <div id="output" class="result"></div>
-</div>
+        <div class="row">
+          <div>
+            <label>あなたの最低実質時給ライン（円）</label>
+            <input id="minHourly" inputmode="numeric" placeholder="例：1500">
+          </div>
+          <div>
+            <label>メモ（任意：会社名など）</label>
+            <input id="memo" placeholder="例：A社 事務職">
+          </div>
+        </div>
 
-<script>
-function calc() {
-  const holiday = Number(document.getElementById("holiday").value);
-  const overtime = Number(document.getElementById("overtime").value);
-  const salary = Number(document.getElementById("salary").value);
-  const bonus = Number(document.getElementById("bonus").value);
+        <div class="btns">
+          <button class="primary" id="calcBtn">計算する</button>
+          <button class="ghost" id="resetBtn">リセット</button>
+        </div>
 
-  const workDays = 365 - holiday;
-  const yearlyHours = workDays * 8 + overtime * 12;
+        <div class="small">
+          計算（ざっくり）<br>
+          年収＝月給×(12＋ボーナスヶ月)<br>
+          年間労働時間＝(365−年間休日)×1日労働時間＋(残業h/月×12)<br>
+          実質時給＝年収÷年間労働時間
+        </div>
+      </div>
 
-  const yearlyIncome =
-    salary * 10000 * 12 +
-    salary * 10000 * bonus;
+      <div class="card">
+        <h2>結果</h2>
+        <div id="resultBox" class="result">
+          <span id="badge" class="badge b-warn">⚠️ まだ計算してません</span>
 
-  const hourly = Math.round(yearlyIncome / yearlyHours);
+          <div class="kv">
+            <div class="item">
+              <div class="k">年収（ボーナス込み）</div>
+              <div class="v" id="vIncome">—</div>
+            </div>
+            <div class="item">
+              <div class="k">実質時給</div>
+              <div class="v" id="vHourly">—</div>
+            </div>
+            <div class="item">
+              <div class="k">年間労働時間</div>
+              <div class="v" id="vYearHours">—</div>
+            </div>
+            <div class="item">
+              <div class="k">年間残業時間</div>
+              <div class="v" id="vYearOT">—</div>
+            </div>
+          </div>
 
-  let msg = `
-    年収：約 ${Math.round(yearlyIncome / 10000)} 万円<br>
-    年間労働時間：約 ${yearlyHours} 時間<br>
-    <strong>実質時給：約 ${hourly} 円</strong>
-  `;
+          <div class="hr"></div>
 
-  let ng = [];
-  if (holiday < 115) ng.push("年間休日が115日未満");
-  if (overtime > 30) ng.push("残業が多い");
-  if (hourly < 1200) ng.push("実質時給が低い");
+          <div class="small" id="detailText">入力して「計算する」を押してね。</div>
+          <ul class="warnlist" id="warnList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  if (ng.length > 0) {
-    msg += `<br><br>⚠️ 注意：${ng.join("・")}`;
-    document.getElementById("output").classList.add("ng");
-  } else {
-    document.getElementById("output").classList.remove("ng");
-  }
+  <script>
+    const $ = (id) => document.getElementById(id);
 
-  document.getElementById("output").innerHTML = msg;
-}
-</script>
+    const el = {
+      salaryMan: $("salaryMan"),
+      bonusMonths: $("bonusMonths"),
+      holidays: $("holidays"),
+      hoursDay: $("hoursDay"),
+      fixedPay: $("fixedPay"),
+      fixedHours: $("fixedHours"),
+      otMonth: $("otMonth"),
+      minHourly: $("minHourly"),
+      memo: $("memo"),
 
+      fixedBox: $("fixedBox"),
+      noFixedBox: $("noFixedBox"),
+
+      badge: $("badge"),
+      vIncome: $("vIncome"),
+      vHourly: $("vHourly"),
+      vYearHours: $("vYearHours"),
+      vYearOT: $("vYearOT"),
+      detailText: $("detailText"),
+      warnList: $("warnList"),
+
+      calcBtn: $("calcBtn"),
+      resetBtn: $("resetBtn"),
+    };
+
+    function num(v){
+      if(v === null || v === undefined) return NaN;
+      const s = String(v).trim().replace(/,/g,"");
+      if(s === "") return NaN;
+      return Number(s);
+    }
+
+    function yen(n){
+      if(!isFinite(n)) return "—";
+      return n.toLocaleString("ja-JP") + "円";
+    }
+    function manYen(n){
+      if(!isFinite(n)) return "—";
+      return Math.round(n).toLocaleString("ja-JP") + "万円";
+    }
+    function hours(n){
+      if(!isFinite(n)) return "—";
+      return Math.round(n).toLocaleString("ja-JP") + "h";
+    }
+
+    function getMode(){
+      const r = document.querySelector('input[name="fixedMode"]:checked');
+      return r ? r.value : "yes";
+    }
+
+    function setModeUI(){
+      const mode = getMode();
+      if(mode === "yes"){
+        el.fixedBox.classList.remove("hidden");
+        el.noFixedBox.classList.add("hidden");
+      }else{
+        el.fixedBox.classList.add("hidden");
+        el.noFixedBox.classList.remove("hidden");
+      }
+    }
+
+    // ラジオ変更で表示切り替え
+    document.querySelectorAll('input[name="fixedMode"]').forEach(r=>{
+      r.addEventListener("change", setModeUI);
+    });
+    setModeUI();
+
+    function setBadge(kind, text){
+      el.badge.className = "badge " + (kind === "ok" ? "b-ok" : kind === "ng" ? "b-ng" : "b-warn");
+      el.badge.textContent = text;
+    }
+
+    function addWarn(msg){
+      const li = document.createElement("li");
+      li.textContent = msg;
+      el.warnList.appendChild(li);
+    }
+
+    function clearWarn(){
+      el.warnList.innerHTML = "";
+    }
+
+    el.calcBtn.addEventListener("click", () => {
+      clearWarn();
+
+      const mode = getMode();
+
+      const salaryMan = num(el.salaryMan.value);      // 万円
+      const bonusMonths = num(el.bonusMonths.value);  // ヶ月
+      const holidays = num(el.holidays.value);
+      const hoursDay = num(el.hoursDay.value);
+      const minHourly = num(el.minHourly.value);
+
+      // 残業（月h）を決める：固定残業ありなら fixedHours を使う
+      let otPerMonth = NaN;
+      let fixedPay = NaN;
+      let fixedHours = NaN;
+
+      if(mode === "yes"){
+        fixedPay = num(el.fixedPay.value);
+        fixedHours = num(el.fixedHours.value);
+        otPerMonth = fixedHours; // 「固定残業時間」を残業として換算
+      }else{
+        otPerMonth = num(el.otMonth.value);
+      }
+
+      // 入力チェック
+      if(!isFinite(salaryMan) || salaryMan <= 0){ addWarn("月給（万円）を入れてね"); }
+      if(!isFinite(bonusMonths) || bonusMonths < 0){ addWarn("ボーナス（ヶ月）は0以上で"); }
+      if(!isFinite(holidays) || holidays <= 0 || holidays > 200){ addWarn("年間休日（日）をそれっぽい値で"); }
+      if(!isFinite(hoursDay) || hoursDay <= 0 || hoursDay > 16){ addWarn("1日の労働時間（h）を入れてね"); }
+      if(!isFinite(otPerMonth) || otPerMonth < 0 || otPerMonth > 200){
+        addWarn(mode === "yes" ? "固定残業時間（h/月）を入れてね" : "想定残業時間（h/月）を入れてね");
+      }
+      if(!isFinite(minHourly) || minHourly <= 0){ addWarn("最低実質時給ライン（円）を入れてね"); }
+
+      // 固定残業ありの追加チェック
+      if(mode === "yes"){
+        if(!isFinite(fixedPay) || fixedPay < 0){ addWarn("固定残業代（円/月）を入れてね"); }
+        if(isFinite(fixedHours) && fixedHours === 0 && isFinite(fixedPay) && fixedPay > 0){
+          addWarn("固定残業時間が0なのに固定残業代がある…？数値確認してね");
+        }
+      }
+
+      // 何か警告が出てたら計算は続けるけど、入力ミスっぽい場合もあるので注意表示
+      const hasInputWarn = el.warnList.children.length > 0;
+
+      // 年収（円）
+      const salaryYen = salaryMan * 10000;
+      const yearlyIncomeYen = salaryYen * (12 + bonusMonths);
+
+      // 年間労働時間（h）
+      const workDays = 365 - holidays;
+      const yearlyOT = otPerMonth * 12;
+      const yearlyHours = (workDays * hoursDay) + yearlyOT;
+
+      // 実質時給（円）
+      const hourly = yearlyHours > 0 ? Math.round(yearlyIncomeYen / yearlyHours) : NaN;
+
+      // 表示
+      el.vIncome.textContent = manYen(yearlyIncomeYen / 10000);
+      el.vYearOT.textContent = hours(yearlyOT);
+      el.vYearHours.textContent = hours(yearlyHours);
+      el.vHourly.textContent = yen(hourly);
+
+      // 判定
+      const msgs = [];
+
+      // あなたの元条件も一応軽く出す（強すぎる判定はここではしない）
+      if(isFinite(holidays) && holidays < 115) msgs.push("年間休日が115日未満");
+      if(isFinite(otPerMonth) && otPerMonth >= 30) msgs.push("残業（換算）が30h/月以上");
+      if(isFinite(salaryMan) && (salaryMan < 20 || salaryMan > 25)) msgs.push("初任給が20〜25万円の範囲外（あなたの基準）");
+
+      // 実質時給ライン判定（これが本命）
+      let status = "warn";
+      if(isFinite(hourly) && isFinite(minHourly)){
+        status = (hourly >= minHourly) ? "ok" : "ng";
+      }
+
+      if(hasInputWarn){
+        setBadge("warn", "⚠️ 入力を確認してね");
+        el.detailText.textContent = "入力に気になる点があるかも。数値を直して再計算してね。";
+        return;
+      }
+
+      if(status === "ok"){
+        setBadge("ok", "✅ 実質時給クリア");
+        el.detailText.textContent = `最低実質時給ライン（${minHourly.toLocaleString("ja-JP")}円）以上。`;
+      }else{
+        setBadge("ng", "❌ 実質時給が足りない");
+        el.detailText.textContent = `最低実質時給ライン（${minHourly.toLocaleString("ja-JP")}円）未満。`;
+      }
+
+      // 固定残業ありなら「固定残業の時給単価」も出して注意喚起
+      clearWarn();
+      if(mode === "yes" && isFinite(fixedPay) && isFinite(fixedHours) && fixedHours > 0){
+        const fixedRate = Math.round(fixedPay / fixedHours); // 円/h
+        addWarn(`固定残業の単価：${fixedRate.toLocaleString("ja-JP")}円/h（固定残業代÷固定残業時間）`);
+        // 目安の注意（厳密な法定割増まではここでは踏み込まない）
+        if(fixedRate < 1200) addWarn("固定残業の単価がかなり低い可能性（目安：1200円/h未満）");
+      }
+
+      // 補足の注意
+      if(msgs.length){
+        addWarn("あなたの最低条件チェック：");
+        msgs.forEach(m=>addWarn("・" + m));
+      }
+
+      // メモ表示（任意）
+      const memo = (el.memo.value || "").trim();
+      if(memo){
+        addWarn(`メモ：${memo}`);
+      }
+    });
+
+    el.resetBtn.addEventListener("click", () => {
+      el.salaryMan.value = "";
+      el.bonusMonths.value = "";
+      el.holidays.value = "";
+      el.fixedPay.value = "";
+      el.fixedHours.value = "";
+      el.otMonth.value = "";
+      el.minHourly.value = "";
+      el.memo.value = "";
+      el.hoursDay.value = "8";
+
+      setBadge("warn", "⚠️ まだ計算してません");
+      el.vIncome.textContent = "—";
+      el.vHourly.textContent = "—";
+      el.vYearHours.textContent = "—";
+      el.vYearOT.textContent = "—";
+      el.detailText.textContent = "入力して「計算する」を押してね。";
+      clearWarn();
+      setModeUI();
+    });
+  </script>
 </body>
 </html>

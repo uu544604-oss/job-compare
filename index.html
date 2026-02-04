@@ -2,10 +2,126 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>就活オファー比較</title>
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f6f8;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      max-width: 420px;
+      margin: 0 auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 16px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #007aff;
+      color: #fff;
+    }
+
+    .result {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ok {
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .ng {
+      background: #fce8e6;
+      color: #a50e0e;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>表示できた！🎉</h1>
-  <p>ここが見えたら成功</p>
+  <h1>就活オファー比較</h1>
+
+  <div class="card">
+    <label>年間休日（日）</label>
+    <input id="holiday" type="number" placeholder="例：120">
+
+    <label>残業時間（月）</label>
+    <input id="overtime" type="number" placeholder="例：20">
+
+    <label>初任給（月・万円）</label>
+    <input id="salary" type="number" placeholder="例：22">
+
+    <button onclick="check()">条件チェック</button>
+
+    <div id="result" class="result" style="display:none;"></div>
+  </div>
+
+  <script>
+    function check() {
+      const holiday = Number(document.getElementById("holiday").value);
+      const overtime = Number(document.getElementById("overtime").value);
+      const salary = Number(document.getElementById("salary").value);
+      const result = document.getElementById("result");
+
+      let ok = true;
+      let messages = [];
+
+      if (holiday < 115) {
+        ok = false;
+        messages.push("年間休日が115日未満");
+      }
+      if (overtime >= 30) {
+        ok = false;
+        messages.push("残業が30時間以上");
+      }
+      if (salary < 20 || salary > 25) {
+        ok = false;
+        messages.push("初任給が20〜25万円外");
+      }
+
+      result.style.display = "block";
+
+      if (ok) {
+        result.className = "result ok";
+        result.textContent = "🎉 条件クリア！いいオファーかも！";
+      } else {
+        result.className = "result ng";
+        result.textContent = "⚠️ 条件NG：" + messages.join("、");
+      }
+    }
+  </script>
 </body>
 </html>
